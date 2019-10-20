@@ -58,7 +58,7 @@ def bellman_optimality_function(x, gamma=0.9):
     # 20  21  22  23  24
 
     # this function can be more automated instead of writing equations manually
-    # for the sake of understanding, we remain unchanged for the time being
+    # for easier understanding, we remain unchanged for the time being
 
     return np.array([
         x[0] - max(x[1] * gamma, x[5] * gamma, x[0] * gamma - 1, ),
@@ -106,4 +106,29 @@ sol = fsolve(bellman_optimality_function, x0=np.array([1]*grid_size*grid_size))
 # page 87, Figure 3.5
 print('\noptimal state value function of GridWorld:')
 print(np.array(sol).reshape([grid_size, grid_size]).round(1))
+
+
+# iteration method (jacobi iteration)
+cof_matrix = np.array(cof_matrix)
+const = np.array(const)
+D = np.diag(cof_matrix)
+L = np.tril(cof_matrix, k=-1)
+U = np.triu(cof_matrix, k=1)
+inv_D = np.diag(1/D)
+assert np.array_equal(np.diag(D) + L + U, cof_matrix)
+
+# initial random guess
+x_k = np.random.rand(25)
+epsilon = 1e-3
+
+while True:
+    # update solution by jacobi iteration, of course there are other more complex iterative methods
+    # the convergence is guaranteed by Banach's fixed point theorem
+    x_k_1 = inv_D.dot(const - (L+U).dot(x_k))
+    if np.linalg.norm(x_k_1 - x_k) < epsilon:
+        break
+    x_k = x_k_1
+x_final = x_k_1
+print('\niterative policy evaluation by jacobi iteration:')
+print(x_final.reshape([grid_size, grid_size]).round(1))
 
