@@ -39,7 +39,13 @@ PMF = {_: {k: poisson.pmf(k, _) for k in range(MAX_CARS + 1)}
 
 
 # policy iteration (two modules)
-def state_value_func(state, value, action):
+def state_value_func(state: tuple, value: dict, action: int) -> int:
+    """
+    :param state: a tuple of state
+    :param value: a dict of state value function which map state to expected cumulative reward
+    :param action: a number of which action to take
+    :return: expected rewards
+    """
     num_cars_a = max(min(state[0] - action, MAX_CARS), 0)
     num_cars_b = max(min(state[1] + action, MAX_CARS), 0)
     expected_returns = - abs(action) * MOVE_CAR_COST
@@ -120,8 +126,8 @@ def visualize(data_matrix):
     figure = plt.figure()
     figure.set_tight_layout(True)
     ax = Axes3D(figure)
-    X, Y = np.meshgrid(np.arange(0, MAX_CARS + 1), np.arange(0, MAX_CARS + 1))
-    ax.plot_surface(X, Y, data_matrix, cmap='rainbow')
+    x, y = np.meshgrid(np.arange(0, MAX_CARS + 1), np.arange(0, MAX_CARS + 1))
+    ax.plot_surface(x, y, data_matrix, cmap='rainbow')
     plt.show()
 
 
