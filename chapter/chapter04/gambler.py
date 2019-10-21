@@ -51,9 +51,9 @@ for state in state_set[1: -1]:
     policy[state] = action_set[(np.round(expected_returns_list[1:], 5)).argmax() + 1]
 
 
+# Example 4.3: Gambler’s Problem (Figure 4.3, P 106)
 plt.scatter([state for state in policy], [policy.get(state) for state in policy])
 plt.xlabel('Capital')
 plt.ylabel('Final policy (stake)')
 plt.grid()
 plt.show()
-
