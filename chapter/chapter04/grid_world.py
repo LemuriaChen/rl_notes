@@ -86,24 +86,6 @@ def simulation(step_x, step_y):
 # negation of the expected number of steps from that state until termination (page 99, Figure 4.1)
 start_x, start_y = 2, 3
 print(f'starting point coordinates: ({start_x}, {start_y})')
-print('average arrival steps is: ')
-print(np.array([simulation(start_x, start_y) for _ in range(10000)]).mean())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+print(f'average arrival steps is: '
+      f'{np.array([simulation(start_x, start_y) for _ in range(10000)]).mean()}')
 
