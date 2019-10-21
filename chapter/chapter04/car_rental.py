@@ -2,6 +2,8 @@
 from scipy.stats import poisson
 import numpy as np
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 
 # part of variables naming rule reference:
@@ -114,8 +116,23 @@ def policy_improved(value: dict) -> dict:
     return policy
 
 
+def visualize(data_matrix):
+    figure = plt.figure()
+    figure.set_tight_layout(True)
+    ax = Axes3D(figure)
+    X, Y = np.meshgrid(np.arange(0, MAX_CARS + 1), np.arange(0, MAX_CARS + 1))
+    ax.plot_surface(X, Y, data_matrix, cmap='rainbow')
+    plt.show()
+
+
+iterations = 0
+
 while True:
+    iterations += 1
+
+    print(f'\nthe {iterations} iteration of policy evaluation')
     new_value = policy_eval(init_policy, init_value)
+    print(f'\nthe {iterations} iteration of policy improvement')
     new_policy = policy_improved(new_value)
 
     if new_policy == init_policy:
@@ -124,3 +141,16 @@ while True:
     init_policy = new_policy
     init_value = new_value
 
+value_matrix = np.zeros([MAX_CARS + 1, MAX_CARS + 1])
+policy_matrix = np.zeros([MAX_CARS + 1, MAX_CARS + 1])
+
+for i in range(MAX_CARS + 1):
+    for j in range(MAX_CARS + 1):
+        value_matrix[i][j] = new_value.get((i, j))
+        policy_matrix[i][j] = new_policy.get((i, j))
+
+# visualization of state value function
+visualize(value_matrix)
+
+# visualization of policy
+visualize(policy_matrix)
