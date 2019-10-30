@@ -3,11 +3,11 @@ import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-
 # A_state_action_values = np.array([0, 0])
 # B_state_action_values = np.array([0] * len(b_actions))
 # A_actions = ['left', 'right']
 # B_actions = list(range(10))
+
 
 states_set = ['A', 'B']
 init_state = 'A'
@@ -168,5 +168,3 @@ plt.show()
 
 # there are some cases that make the optimal strategy not the optimal strategy
 # episode_double(verbose=True, update=False, eps=0)
-
-
