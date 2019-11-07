@@ -60,10 +60,11 @@ def greedy_policy(current_state: tuple, eps: float):
     return prob
 
 
-def episode_q_learning(update: bool, eps: float):
+def episode_q_learning(update: bool, eps: float, verbose: bool):
     """
-    :param update: if update the state value functions in a episode
-    :param eps: epsilon
+    :param update:
+    :param eps:
+    :param verbose:
     :return:
     """
     old_state = init_state
@@ -72,6 +73,8 @@ def episode_q_learning(update: bool, eps: float):
     while True:
         old_action = np.random.choice(actions_set,
                                       p=greedy_policy(old_state, eps))
+        if verbose:
+            print(f'{old_state} -> {old_action}')
         new_state = cliff_step(old_state, old_action)
 
         reward = -100 if new_state in cliff_state_sets else -1
@@ -92,7 +95,7 @@ def episode_q_learning(update: bool, eps: float):
     return total_rewards
 
 
-def episode_sarsa(update: bool, eps: float):
+def episode_sarsa(update: bool, eps: float, verbose: bool):
 
     old_state = init_state
     old_action = np.random.choice(actions_set,
@@ -100,7 +103,11 @@ def episode_sarsa(update: bool, eps: float):
     total_rewards = 0
 
     while True:
+        if verbose:
+            print(f'{old_state} -> {old_action}')
+
         new_state = cliff_step(old_state, old_action)
+
         reward = -100 if new_state in cliff_state_sets else -1
         total_rewards += reward
 
@@ -131,9 +138,9 @@ rewards_q_learning = np.zeros([n_avg, n_episodes])
 for i in tqdm(range(n_avg)):
     state_action_values = np.zeros([length, width, len(actions_set)])
     for j in range(n_episodes):
-        rewards_q_learning[i, j] = episode_q_learning(update=True, eps=epsilon)
+        rewards_q_learning[i, j] = episode_q_learning(update=True, eps=epsilon, verbose=False)
 
-# episode_q_learning(update=False, eps=0)
+episode_q_learning(update=False, eps=0, verbose=True)
 
 ################################################################################
 # SARSA
@@ -144,9 +151,9 @@ rewards_sarsa = np.zeros([n_avg, n_episodes])
 for i in tqdm(range(n_avg)):
     state_action_values = np.zeros([length, width, len(actions_set)])
     for j in range(n_episodes):
-        rewards_sarsa[i, j] = episode_sarsa(update=True, eps=epsilon)
+        rewards_sarsa[i, j] = episode_sarsa(update=True, eps=epsilon, verbose=False)
 
-# episode_sarsa(update=False, eps=0)
+episode_sarsa(update=False, eps=0, verbose=True)
 
 ################################################################################
 plt.plot(rewards_q_learning.mean(axis=0), label='Q-learning')

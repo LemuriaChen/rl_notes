@@ -41,7 +41,7 @@ def random_walk():
 
 def mse(state_val):
     return np.sqrt(np.mean(np.square(np.array(state_val) -
-                                       np.array(state_val_real))))
+                                     np.array(state_val_real))))
 
 
 # Monte Carlo Methods
@@ -71,10 +71,14 @@ state_val_num = np.zeros(len(state_set))
 for i in range(n_episodes):
     states, rewards = random_walk()
     for state in states[:-1]:
+        state_val_num[state] += 1
+        # state_val_est[state] = state_val_est[state] + 1 / state_val_num[state] * (
+        #         rewards[-1] - state_val_est[state])
         state_val_est[state] = state_val_est[state] + alpha * (
                 rewards[-1] - state_val_est[state])
 
 print(state_val_est[1: -1].round(4))
+print(np.array(state_val_real).round(4))
 
 plt.plot(state_val_est[1: -1], label='TD')
 plt.plot(state_val_real, label='True')

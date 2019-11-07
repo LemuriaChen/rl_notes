@@ -131,8 +131,8 @@ def visualize(data_matrix):
     plt.show()
 
 
+# it takes a long time to run
 iterations = 0
-
 while True:
     iterations += 1
 
