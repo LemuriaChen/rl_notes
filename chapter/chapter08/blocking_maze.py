@@ -4,7 +4,7 @@ from collections import defaultdict
 import random
 import matplotlib.pyplot as plt
 
-np.random.seed(100)
+# np.random.seed(100)
 
 ACTIONS_REPR = ['up', 'down', 'left', 'right']
 ACTIONS = [0, 1, 2, 3]
@@ -64,7 +64,7 @@ def show_optimal_path(old_state, q_value_func, obstacle_states):
     step = 0
     print('Game start')
     while True:
-        old_action = greedy_policy(q_value_func, old_state, ACTIONS, eps=0)
+        old_action = greedy_policy(q_value_func, old_state, ACTIONS, eps=1e-2)
         print(f'{old_state} -> {ACTIONS_REPR[old_action]}')
         new_state, reward = block_maze_step(old_state, old_action, obstacle_states)
         step += 1
@@ -143,6 +143,7 @@ plt.show()
 
 # Dyna-Q
 def episode(q_value_func, obstacle_states, eps):
+    # global model_sa_cnt
     step = 0
     old_state = INIT_STATE
     while True:                                                                             # (a)
@@ -155,11 +156,15 @@ def episode(q_value_func, obstacle_states, eps):
         )
         model_sa[old_state].add(old_action)                                                 # (e)
         model[(old_state, old_action)] = (new_state, reward)
+        model_sa_cnt.__iadd__(1)
+        model_sa_cnt[old_state][old_action] = 0
+
         # planning (indirect reinforcement learning)
         for loop in range(n):                                                               # (f)
             rand_state = random.sample(model_sa.keys(), k=1)[0]
             rand_action = random.sample(model_sa[rand_state], k=1)[0]
             new_rand_state, new_reward = model[(rand_state, rand_action)]
+            new_reward += kappa * np.sqrt(model_sa_cnt[rand_state][rand_action])
             q_value_func[rand_state][rand_action] += alpha * (
                     new_reward + gamma * np.max(q_value_func[new_rand_state]) -
                     q_value_func[rand_state][rand_action]
@@ -171,39 +176,54 @@ def episode(q_value_func, obstacle_states, eps):
     return step
 
 
-# model learning (actually state action pairs storage)
-model = defaultdict(tuple)
-model_sa = defaultdict(set)
-model_sa_cnt = defaultdict(int)
+if __name__ == '__main__':
 
-old_obs_states = [(_, 2) for _ in range(0, 8)]
-new_obs_states = [(_, 2) for _ in range(1, 9)]
+    # model learning (actually state action pairs storage)
+    model = defaultdict(tuple)
+    model_sa = defaultdict(set)
+    model_sa_cnt = np.zeros([MAZE_LENGTH, MAZE_WIDTH, 4])
 
-q_values = np.zeros([MAZE_LENGTH, MAZE_WIDTH, 4])
+    old_obs_states = [(_, 2) for _ in range(0, 8)]
+    new_obs_states = [(_, 2) for _ in range(1, 9)]
 
-epsilon = 0.1
-gamma = 0.95
-alpha = 1
-n = 10
+    q_values = np.zeros([MAZE_LENGTH, MAZE_WIDTH, 4])
 
-cum_reward = 0
-cum_rewards = [cum_reward]
-cum_step = 0
-cum_steps = [cum_step]
+    epsilon = 0.1
+    gamma = 0.95
+    alpha = 1
+    kappa = 1e-4
+    n = 10
 
-while True:
-    if cum_step <= 1000:
-        cum_step += episode(q_values, old_obs_states, eps=epsilon)
-    else:
-        cum_step += episode(q_values, new_obs_states, eps=epsilon)
+    cum_reward = 0
+    cum_rewards = [cum_reward]
+    cum_step = 0
+    cum_steps = [cum_step]
 
-    cum_steps.append(cum_step)
-    cum_reward += 1
-    cum_rewards.append(cum_reward)
-    if cum_step >= 3000:
-        break
+    while True:
+        if cum_step <= 1000:
+            cum_step += episode(q_values, old_obs_states, eps=epsilon)
+        else:
+            # show_optimal_path(INIT_STATE, q_values, old_obs_states)
+            cum_step += episode(q_values, new_obs_states, eps=epsilon)
 
-plt.plot(cum_steps)
-plt.show()
+        cum_steps.append(cum_step)
+        cum_reward += 1
+        cum_rewards.append(cum_reward)
 
-# show_optimal_path(INIT_STATE, q_values, new_obs_states)
+        if cum_step >= 3000:
+            break
+
+    plt.plot(cum_steps, cum_rewards)
+    plt.xlim(0, 3000)
+    plt.show()
+
+    # show_optimal_path(INIT_STATE, q_values, new_obs_states)
+
+
+
+
+
+
+
+
+
